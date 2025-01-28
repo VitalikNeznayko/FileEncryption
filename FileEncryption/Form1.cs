@@ -161,24 +161,21 @@ namespace FileEncryption
             string operation = isEncoding ? "зашифровано" : "дешифровано";
             MessageBox.Show($"Файл успішно {operation}: {currentFilePath}\nЧас виконання: {elapsedTime.TotalSeconds:F2} секунд.", "Готово", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
-        private void btn_ChooseFIleEncoding_Click(object sender, EventArgs e)
+        private string ChooseFile()
         {
             var dlg = new OpenFileDialog();
             dlg.Filter = "Text Files|*.txt;*.doc;*.docx;*.xls;*.xlsx|All Files|*.*";
-            if (dlg.ShowDialog() == DialogResult.OK)
-            {
-                tb_4FileEncoding.Text = dlg.FileName;
-            }
+            return dlg.ShowDialog() == DialogResult.OK ? dlg.FileName : null;
+        }
+
+        private void btn_ChooseFIleEncoding_Click(object sender, EventArgs e)
+        {
+            tb_4FileEncoding.Text = ChooseFile();
         }
 
         private void btn_ChooseFIleDecoding_Click(object sender, EventArgs e)
         {
-            var dlg = new OpenFileDialog();
-            dlg.Filter = "Text Files|*.txt;*.doc;*.docx;*.xls;*.xlsx|All Files|*.*";
-            if (dlg.ShowDialog() == DialogResult.OK)
-            {
-                tb_4FileDecoding.Text = dlg.FileName;
-            }
+            tb_4FileDecoding.Text = ChooseFile();
         }
     }
 }
