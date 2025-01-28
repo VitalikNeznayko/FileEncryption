@@ -72,9 +72,11 @@ namespace FileEncryption
 
             bgWorker.RunWorkerAsync();
         }
-        private void EncryptFile(string filePath, string key, BackgroundWorker worker)
+
+        private void EncryptOrDecryptFile(string filePath, string key, BackgroundWorker worker)
         {
             byte[] keyBytes = Encoding.UTF8.GetBytes(key);
+
             string tempFile = Path.GetTempFileName();
 
             using (FileStream inputStream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
@@ -87,7 +89,6 @@ namespace FileEncryption
 
                 while ((bytesRead = inputStream.Read(buffer, 0, buffer.Length)) > 0)
                 {
-                    // Шифрування даних
                     for (int i = 0; i < bytesRead; i++)
                     {
                         buffer[i] ^= keyBytes[i % keyBytes.Length];
@@ -96,39 +97,6 @@ namespace FileEncryption
 
                     processedBytes += bytesRead;
                     int progressPercentage = (int)((processedBytes * 100) / totalBytes);
-                    worker.ReportProgress(progressPercentage);
-                }
-            }
-
-            File.Copy(tempFile, filePath, overwrite: true);
-            File.Delete(tempFile);
-        }
-
-        private void DecryptFile(string filePath, string key, BackgroundWorker worker)
-        {
-            byte[] keyBytes = Encoding.UTF8.GetBytes(key);
-            string tempFile = Path.GetTempFileName();
-
-            using (FileStream inputStream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
-            using (FileStream tempStream = new FileStream(tempFile, FileMode.Create, FileAccess.Write))
-            {
-                byte[] buffer = new byte[8192];
-                long totalBytes = inputStream.Length;
-                long processedBytes = 0;
-                int bytesRead;
-
-                while ((bytesRead = inputStream.Read(buffer, 0, buffer.Length)) > 0)
-                {
-                    // Дешифрування даних
-                    for (int i = 0; i < bytesRead; i++)
-                    {
-                        buffer[i] ^= keyBytes[i % keyBytes.Length];
-                    }
-                    tempStream.Write(buffer, 0, bytesRead);
-
-                    processedBytes += bytesRead;
-                    int progressPercentage = (int)((processedBytes * 100) / totalBytes);
-                    worker.ReportProgress(progressPercentage);
                 }
             }
 
@@ -138,14 +106,7 @@ namespace FileEncryption
 
         private void BgWorker_DoWork(object sender, DoWorkEventArgs e)
         {
-            if (isEncoding)
-            {
-                EncryptFile(currentFilePath, currentKey, (BackgroundWorker)sender);
-            }
-            else
-            {
-                DecryptFile(currentFilePath, currentKey, (BackgroundWorker)sender);
-            }
+            EncryptOrDecryptFile(currentFilePath, currentKey, (BackgroundWorker)sender);
         }
 
 
