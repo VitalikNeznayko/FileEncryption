@@ -1,11 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
 
@@ -22,7 +17,6 @@ namespace FileEncryption
 
         private DateTime startTime;
         private Timer timer = new Timer();
-        private TimeSpan elapsedTime;
 
         public Form1()
         {
@@ -104,20 +98,15 @@ namespace FileEncryption
         private void BgWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             timer.Stop();
-            elapsedTime = DateTime.Now - startTime;
             string operation = isEncoding ? "зашифровано" : "дешифровано";
-            MessageBox.Show($"Файл успішно {operation}: {currentFilePath}\nЧас виконання: {elapsedTime.TotalSeconds:F2} секунд.", "Готово", MessageBoxButtons.OK, MessageBoxIcon.Information);
-        }
-        private string ChooseFile()
-        {
-            var dlg = new OpenFileDialog();
-            dlg.Filter = "Text Files|*.txt;*.doc;*.docx;*.xls;*.xlsx|All Files|*.*";
-            return dlg.ShowDialog() == DialogResult.OK ? dlg.FileName : null;
+            MessageBox.Show($"Файл успішно {operation}: {currentFilePath}\nЧас виконання: {(DateTime.Now - startTime).TotalSeconds:F2} секунд.", "Готово", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private void btn_ChooseFIleEncoding_Click(object sender, EventArgs e)
         {
-            tb_4FileEncoding.Text = ChooseFile();
+            var dlg = new OpenFileDialog();
+            dlg.Filter = "Text Files|*.txt;*.doc;*.docx;*.xls;*.xlsx|All Files|*.*";
+            tb_4FileEncoding.Text = dlg.ShowDialog() == DialogResult.OK ? dlg.FileName : null;
         }
     }
 }
