@@ -59,13 +59,6 @@ namespace FileEncryption
             StartFileOperation(filePath, key, true);
         }
 
-        private void btn_decoding_Click(object sender, EventArgs e)
-        {
-            string filePath = tb_4FileDecoding.Text;
-            string key = tb_keyDecoding.Text;
-            StartFileOperation(filePath, key, false);
-        }
-
         private void EncryptOrDecryptFile(string filePath, string key, BackgroundWorker worker)
         {
             byte[] keyBytes = Encoding.UTF8.GetBytes(key);
@@ -125,11 +118,6 @@ namespace FileEncryption
         private void btn_ChooseFIleEncoding_Click(object sender, EventArgs e)
         {
             tb_4FileEncoding.Text = ChooseFile();
-        }
-
-        private void btn_ChooseFIleDecoding_Click(object sender, EventArgs e)
-        {
-            tb_4FileDecoding.Text = ChooseFile();
         }
     }
 }
