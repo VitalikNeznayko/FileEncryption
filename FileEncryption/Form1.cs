@@ -76,28 +76,37 @@ namespace FileEncryption
             using (FileStream inputStream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
             using (FileStream tempStream = new FileStream(tempFile, FileMode.Create, FileAccess.Write))
             {
-                byte[] buffer = new byte[8192];
-                long totalBytes = inputStream.Length;
-                long processedBytes = 0;
-                int bytesRead;
-
-                while ((bytesRead = await inputStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
-                {
-                    for (int i = 0; i < bytesRead; i++)
-                    {
-                        buffer[i] ^= keyBytes[i % keyBytes.Length];
-                    }
-
-                    await tempStream.WriteAsync(buffer, 0, bytesRead);
-
-                    processedBytes += bytesRead;
-                    int progressPercentage = (int)((processedBytes * 100) / totalBytes);
-                    progress.Report(progressPercentage);
-                }
+                await ProcessFileStreamAsync(inputStream, tempStream, keyBytes, progress);
             }
 
             File.Copy(tempFile, filePath, overwrite: true);
             File.Delete(tempFile);
+        }
+
+        private async Task ProcessFileStreamAsync(Stream inputStream, Stream outputStream, byte[] keyBytes, IProgress<int> progress)
+        {
+            byte[] buffer = new byte[8192];
+            long totalBytes = inputStream.Length;
+            long processedBytes = 0;
+            int bytesRead;
+
+            while ((bytesRead = await inputStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+            {
+                ProcessBuffer(buffer, bytesRead, keyBytes);
+                await outputStream.WriteAsync(buffer, 0, bytesRead);
+
+                processedBytes += bytesRead;
+                int progressPercentage = (int)((processedBytes * 100) / totalBytes);
+                progress.Report(progressPercentage);
+            }
+        }
+
+        private void ProcessBuffer(byte[] buffer, int bytesRead, byte[] keyBytes)
+        {
+            for (int i = 0; i < bytesRead; i++)
+            {
+                buffer[i] ^= keyBytes[i % keyBytes.Length];
+            }
         }
 
 
