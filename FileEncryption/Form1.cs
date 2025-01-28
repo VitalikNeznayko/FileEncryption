@@ -33,44 +33,37 @@ namespace FileEncryption
             bgWorker.RunWorkerCompleted += BgWorker_RunWorkerCompleted;
         }
 
-        private void btn_encoding_Click(object sender, EventArgs e)
+        private void StartFileOperation(string filePath, string key, bool encoding)
         {
-            if (string.IsNullOrEmpty(tb_4FileEncoding.Text) || string.IsNullOrEmpty(tb_keyEncoding.Text))
+            if (string.IsNullOrEmpty(filePath) || string.IsNullOrEmpty(key))
             {
-                MessageBox.Show("Будь ласка, виберіть файл і введіть ключ.", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Будь ласка, виберіть файл та введіть ключ.", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
-            currentFilePath = tb_4FileEncoding.Text;
-            currentKey = tb_keyEncoding.Text;
-            isEncoding = true;
+            currentFilePath = filePath;
+            currentKey = key;
+            isEncoding = encoding;
 
             progressBar.Value = 0;
-
             startTime = DateTime.Now;
             timer.Start();
 
             bgWorker.RunWorkerAsync();
         }
 
+        private void btn_encoding_Click(object sender, EventArgs e)
+        {
+            string filePath = tb_4FileEncoding.Text;
+            string key = tb_keyEncoding.Text;
+            StartFileOperation(filePath, key, true);
+        }
+
         private void btn_decoding_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrEmpty(tb_4FileDecoding.Text) || string.IsNullOrEmpty(tb_keyDecoding.Text))
-            {
-                MessageBox.Show("Будь ласка, виберіть файл та введіть ключ.", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            currentFilePath = tb_4FileDecoding.Text;
-            currentKey = tb_keyDecoding.Text;
-            isEncoding = false;
-
-            progressBar.Value = 0;
-
-            startTime = DateTime.Now;
-            timer.Start();
-
-            bgWorker.RunWorkerAsync();
+            string filePath = tb_4FileDecoding.Text;
+            string key = tb_keyDecoding.Text;
+            StartFileOperation(filePath, key, false);
         }
 
         private void EncryptOrDecryptFile(string filePath, string key, BackgroundWorker worker)
