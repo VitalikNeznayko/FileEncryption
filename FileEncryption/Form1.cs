@@ -8,6 +8,8 @@ namespace FileEncryption
 {
     public partial class Form1 : Form
     {
+        private const int BufferSize = 8192;
+
         private string currentFilePath;
         private string currentKey;
         private bool isEncoding;
@@ -85,7 +87,7 @@ namespace FileEncryption
 
         private async Task ProcessFileStreamAsync(Stream inputStream, Stream outputStream, byte[] keyBytes, IProgress<int> progress)
         {
-            byte[] buffer = new byte[8192];
+            byte[] buffer = new byte[BufferSize];
             long totalBytes = inputStream.Length;
             long processedBytes = 0;
             int bytesRead;
