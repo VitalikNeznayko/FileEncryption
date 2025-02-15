@@ -11,7 +11,6 @@ namespace FileEncryption
         private string currentFilePath;
         private string currentKey;
         private bool isEncoding;
-
         private DateTime startTime;
         private Timer timer = new Timer();
         private TimeSpan elapsedTime;
@@ -21,51 +20,70 @@ namespace FileEncryption
             InitializeComponent();
         }
 
-        private async void StartFileOperation(string filePath, string key, bool encoding)
+        private void StartFileOperation(string filePath, string key, bool encoding)
+        {
+            if (!ValidateInputs(filePath, key)) return;
+
+            PrepareForOperation(filePath, key, encoding);
+            ExecuteFileOperationAsync().ConfigureAwait(false);
+        }
+
+        private bool ValidateInputs(string filePath, string key)
         {
             if (string.IsNullOrEmpty(filePath) || string.IsNullOrEmpty(key))
             {
                 MessageBox.Show("Будь ласка, виберіть файл та введіть ключ.", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
+                return false;
             }
+            return true;
+        }
 
+        private void PrepareForOperation(string filePath, string key, bool encoding)
+        {
             currentFilePath = filePath;
             currentKey = key;
             isEncoding = encoding;
-
             progressBar.Value = 0;
             startTime = DateTime.Now;
             timer.Start();
+        }
 
+        private async Task ExecuteFileOperationAsync()
+        {
             var progress = new Progress<int>(percent => progressBar.Value = percent);
 
             try
             {
                 await EncryptOrDecryptFileAsync(currentFilePath, currentKey, progress);
-                timer.Stop();
-                elapsedTime = DateTime.Now - startTime;
-
-                string operation = isEncoding ? "зашифровано" : "дешифровано";
-                MessageBox.Show($"Файл успішно {operation}: {currentFilePath}\nЧас виконання: {elapsedTime.TotalSeconds:F2} секунд.", "Готово", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                FinalizeOperation();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Сталася помилка: {ex.Message}", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                HandleError(ex);
             }
+        }
+
+        private void FinalizeOperation()
+        {
+            timer.Stop();
+            elapsedTime = DateTime.Now - startTime;
+            string operation = isEncoding ? "зашифровано" : "дешифровано";
+            MessageBox.Show($"Файл успішно {operation}: {currentFilePath}\nЧас виконання: {elapsedTime.TotalSeconds:F2} секунд.", "Готово", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void HandleError(Exception ex)
+        {
+            MessageBox.Show($"Сталася помилка: {ex.Message}", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
         private void btn_encoding_Click(object sender, EventArgs e)
         {
-            string filePath = tb_4FileEncoding.Text;
-            string key = tb_keyEncoding.Text;
-            StartFileOperation(filePath, key, true);
+            StartFileOperation(tb_4FileEncoding.Text, tb_keyEncoding.Text, true);
         }
 
         private void btn_decoding_Click(object sender, EventArgs e)
         {
-            string filePath = tb_4FileDecoding.Text;
-            string key = tb_keyDecoding.Text;
-            StartFileOperation(filePath, key, false);
+            StartFileOperation(tb_4FileDecoding.Text, tb_keyDecoding.Text, false);
         }
 
         private async Task EncryptOrDecryptFileAsync(string filePath, string key, IProgress<int> progress)
@@ -94,10 +112,8 @@ namespace FileEncryption
             {
                 ProcessBuffer(buffer, bytesRead, keyBytes);
                 await outputStream.WriteAsync(buffer, 0, bytesRead);
-
                 processedBytes += bytesRead;
-                int progressPercentage = (int)((processedBytes * 100) / totalBytes);
-                progress.Report(progressPercentage);
+                progress.Report((int)((processedBytes * 100) / totalBytes));
             }
         }
 
@@ -109,14 +125,12 @@ namespace FileEncryption
             }
         }
 
-
         private string ChooseFile()
         {
-            var dlg = new OpenFileDialog
+            using (var dlg = new OpenFileDialog { Filter = "Text Files|*.txt;*.doc;*.docx;*.xls;*.xlsx|All Files|*.*" })
             {
-                Filter = "Text Files|*.txt;*.doc;*.docx;*.xls;*.xlsx|All Files|*.*"
-            };
-            return dlg.ShowDialog() == DialogResult.OK ? dlg.FileName : null;
+                return dlg.ShowDialog() == DialogResult.OK ? dlg.FileName : null;
+            }
         }
 
         private void btn_ChooseFIleEncoding_Click(object sender, EventArgs e)
