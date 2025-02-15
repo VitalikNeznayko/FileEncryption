@@ -14,6 +14,7 @@ namespace FileEncryption
         private DateTime startTime;
         private Timer timer = new Timer();
         private TimeSpan elapsedTime;
+        private const int BufferSize = 8192;
 
         public Form1()
         {
@@ -102,7 +103,7 @@ namespace FileEncryption
 
         private async Task ProcessFileStreamAsync(Stream inputStream, Stream outputStream, byte[] keyBytes, IProgress<int> progress)
         {
-            byte[] buffer = new byte[8192];
+            byte[] buffer = new byte[BufferSize];
             long totalBytes = inputStream.Length;
             long processedBytes = 0;
             int bytesRead;
