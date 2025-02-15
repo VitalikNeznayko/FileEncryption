@@ -76,14 +76,13 @@ namespace FileEncryption
             MessageBox.Show($"Сталася помилка: {ex.Message}", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
-        private void btn_encoding_Click(object sender, EventArgs e)
-        {
-            StartFileOperation(tb_4FileEncoding.Text, tb_keyEncoding.Text, true);
-        }
+        private void btn_encoding_Click(object sender, EventArgs e) => StartOperation(tb_4FileEncoding, tb_keyEncoding, true);
+        private void btn_decoding_Click(object sender, EventArgs e) => StartOperation(tb_4FileDecoding, tb_keyDecoding, false);
 
-        private void btn_decoding_Click(object sender, EventArgs e)
+
+        private void StartOperation(TextBox filePathBox, TextBox keyBox, bool encoding)
         {
-            StartFileOperation(tb_4FileDecoding.Text, tb_keyDecoding.Text, false);
+            StartFileOperation(filePathBox.Text, keyBox.Text, encoding);
         }
 
         private async Task EncryptOrDecryptFileAsync(string filePath, string key, IProgress<int> progress)
